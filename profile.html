@@ -1,0 +1,49 @@
+<!-- templates/profile.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 600px; margin: auto; }
+        button { padding: 8px 16px; background: #007bff; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome, {{ username }}</h2>
+        <p>Credits: {{ credits }}</p>
+        <h3>Upload Document</h3>
+        <form id="scanForm" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".txt" required>
+            <button type="submit">Scan</button>
+        </form>
+        <h3>Past Scans</h3>
+        <ul>
+            {% for scan in scans %}
+                <li>{{ scan[1] }} <a href="/matches/{{ scan[0] }}">View Matches</a></li>
+            {% endfor %}
+        </ul>
+        <button onclick="requestCredits()">Request Credits</button>
+        {% if session['role'] == 'admin' %}
+            <a href="/admin/analytics"><button>View Analytics</button></a>
+        {% endif %}
+    </div>
+    <script>
+        async function requestCredits() {
+            const response = await fetch('/credits/request', { method: 'POST' });
+            const data = await response.json();
+            alert(data.message);
+        }
+
+        document.getElementById('scanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/scan', { method: 'POST', body: formData });
+            const data = await response.json();
+            alert(data.message);
+            if (response.ok) window.location.reload();
+        });
+    </script>
+</body>
+</html>
